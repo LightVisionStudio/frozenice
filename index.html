@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FrozenIce Client</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0b0f14;color:#e7edf5}
+a{color:#8ec2ff;text-decoration:none}
+.container{max-width:1080px;margin:0 auto;padding:24px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:#0f141b;border-bottom:1px solid #1d2733;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.brand-badge{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#3bd2ff,#6d93ff);display:flex;align-items:center;justify-content:center;color:#0b0f14;font-weight:800}
+.brand-title{letter-spacing:.5px}
+.status-pill{padding:6px 10px;border:1px solid #263244;border-radius:999px;font-size:13px;display:flex;align-items:center;gap:8px}
+.crown{font-size:18px;color:#ffd773}
+.main{padding:24px}
+.card{background:#10161e;border:1px solid #1b2735;border-radius:14px}
+.card-pad{padding:20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;background:#2a80ff;color:white;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.1)}
+.btn-secondary{background:#172030;color:#bcd2ea;border:1px solid #253447}
+.btn-danger{background:#ff4d6d}
+.muted{color:#a9b9cc}
+.headline{font-size:24px;font-weight:800;margin:0}
+.sub{font-size:14px;margin-top:6px}
+.hero{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hero-stat{padding:12px 14px;border:1px solid #203042;border-radius:10px;background:#0f141b}
+.input-row{display:flex;gap:12px;flex-wrap:wrap}
+.input{flex:1;min-width:200px;padding:12px 14px;border-radius:10px;border:1px solid #223243;background:#0b1219;color:#e7edf5}
+.chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:8px 10px;border-radius:10px;background:#122031;border:1px solid #213246;color:#c9d7e8;cursor:pointer}
+.platform{padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f141b;display:flex;flex-direction:column;gap:10px}
+.platform-title{font-weight:700}
+.platform-status{font-size:12px;color:#9cb3cd}
+.platform-actions{display:flex;gap:10px}
+.center{display:flex;align-items:center;justify-content:center}
+.hidden{display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#10161e;border:1px solid #1b2735;color:#e7edf5;padding:12px 16px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.2s}
+.toast.show{opacity:1;pointer-events:auto}
+.confirm{max-width:560px;margin:24px auto}
+.sep{height:1px;background:#1b2735;margin:16px 0}
+.loader{width:18px;height:18px;border-radius:50%;border:3px solid #2a80ff;border-top-color:transparent;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="brand">
+    <div class="brand-badge">F</div>
+    <div class="brand-title">FrozenIce Client</div>
+  </div>
+  <div id="accountStatus" class="status-pill">
+    <span id="accountName">Signed out</span>
+  </div>
+</header>
+<main class="main container">
+  <section id="loginView" class="card card-pad">
+    <div class="hero">
+      <h1 class="headline">Sign in to continue</h1>
+      <div class="hero-stat">Used by almost 10K users now</div>
+    </div>
+    <p class="sub muted">Enter your User ID and Security Code</p>
+    <div class="input-row">
+      <input id="userId" class="input" placeholder="User ID">
+      <input id="secCode" class="input" placeholder="Security Code" type="password">
+      <button id="loginBtn" class="btn">Login</button>
+    </div>
+    
+  </section>
+
+  <section id="homeView" class="hidden">
+    <div class="card card-pad hero">
+      <h1 class="headline">Download FrozenIce client on</h1>
+      <div class="hero-stat">Used by almost 10K users now</div>
+    </div>
+    <div class="grid">
+      <div class="platform">
+        <div class="platform-title">Roblox</div>
+        <div class="platform-status">Not bought</div>
+        <div class="platform-actions">
+          <button class="btn-secondary btn" disabled>Unavailable</button>
+        </div>
+      </div>
+      <div class="platform">
+        <div class="platform-title">Minecraft</div>
+        <div class="platform-status">Redeem key to install</div>
+        <div class="platform-actions">
+          <button id="redeemOpen" class="btn">Redeem Key</button>
+        </div>
+      </div>
+      <div class="platform">
+        <div class="platform-title">Rust</div>
+        <div class="platform-status">Not bought</div>
+        <div class="platform-actions">
+          <button class="btn-secondary btn" disabled>Unavailable</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="redeemView" class="card card-pad hidden">
+    <h2 class="headline">Redeem Minecraft Key</h2>
+    <p class="sub muted">Enter your purchase key to proceed</p>
+    <div class="input-row">
+      <input id="keyInput" class="input" placeholder="Enter key">
+      <button id="keyValidate" class="btn">Validate</button>
+      <button id="redeemCancel" class="btn-secondary btn">Cancel</button>
+    </div>
+  </section>
+
+  <section id="confirmView" class="card card-pad hidden">
+    <div class="confirm">
+      <h2 class="headline">Key Confirmation</h2>
+      <div class="sep"></div>
+      <div id="confirmKey" class="muted"></div>
+      <div class="sep"></div>
+      <div class="muted">If this key is used for the first time, you will receive 1 invite key for any friend.</div>
+      <div style="height:12px"></div>
+      <div class="input-row">
+        <button id="confirmBtn" class="btn">Confirm</button>
+        <button id="confirmCancel" class="btn-secondary btn">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="errorView" class="card card-pad hidden">
+    <div class="center" style="flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="errorSpinner" class="loader"></div>
+        <div id="errorLead" class="headline">Processing</div>
+      </div>
+      <div id="errorText" class="muted"></div>
+      <div class="input-row">
+        <button id="errorHome" class="btn hidden">Back Home</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+<script>
+/*
+Accounts:
+- Friend: User ID 1187587317832526, Security Code 12@IarpLA51976@pAR
+- Premium: User ID 8176979852678352876, Security Code 48A4Ra@RALllmA@9R3EA
+- Minecraft Required Key: MPAE-R1A5-FFA9-R5ZA
+*/
+const ids={friend:{id:'1187587317832526',code:'12@IarpLA51976@pAR'},me:{id:'8176979852678352876',code:'48A4Ra@RALllmA@9R3EA'}};
+const REQUIRED_KEY='MPAE-R1A5-FFA9-R5ZA';
+const el={
+  loginView:document.getElementById('loginView'),
+  homeView:document.getElementById('homeView'),
+  redeemView:document.getElementById('redeemView'),
+  confirmView:document.getElementById('confirmView'),
+  errorView:document.getElementById('errorView'),
+  userId:document.getElementById('userId'),
+  secCode:document.getElementById('secCode'),
+  loginBtn:document.getElementById('loginBtn'),
+  accountStatus:document.getElementById('accountStatus'),
+  accountName:document.getElementById('accountName'),
+  redeemOpen:document.getElementById('redeemOpen'),
+  keyInput:document.getElementById('keyInput'),
+  keyValidate:document.getElementById('keyValidate'),
+  redeemCancel:document.getElementById('redeemCancel'),
+  confirmKey:document.getElementById('confirmKey'),
+  confirmBtn:document.getElementById('confirmBtn'),
+  confirmCancel:document.getElementById('confirmCancel'),
+  errorSpinner:document.getElementById('errorSpinner'),
+  errorLead:document.getElementById('errorLead'),
+  errorText:document.getElementById('errorText'),
+  errorHome:document.getElementById('errorHome'),
+  toast:document.getElementById('toast')
+};
+let state={user:null,key:null};
+function showToast(t){el.toast.textContent=t;el.toast.classList.add('show');setTimeout(()=>el.toast.classList.remove('show'),1800)}
+function setView(name){
+  el.loginView.classList.toggle('hidden',name!=='login');
+  el.homeView.classList.toggle('hidden',name!=='home');
+  el.redeemView.classList.toggle('hidden',name!=='redeem');
+  el.confirmView.classList.toggle('hidden',name!=='confirm');
+  el.errorView.classList.toggle('hidden',name!=='error');
+}
+function setAccount(){
+  if(!state.user){el.accountName.textContent='Signed out';el.accountStatus.classList.remove('crown');return}
+  const premium=state.user.id===ids.me.id;
+  el.accountName.textContent=premium?'Premium':'Standard';
+  el.accountStatus.innerHTML=premium?'<span class="crown">👑</span><span>Premium</span>':'<span>Signed in</span>';
+}
+el.loginBtn.onclick=()=>{
+  const id=el.userId.value.trim(),code=el.secCode.value.trim();
+  if(!id||!code){showToast('Enter both fields');return}
+  const match=[ids.friend,ids.me].find(a=>a.id===id&&a.code===code);
+  if(!match){showToast('Invalid credentials');return}
+  state.user=match;setAccount();setView('home');showToast('Signed in');
+}
+el.redeemOpen.onclick=()=>{if(!state.user){setView('login');showToast('Sign in first');return}setView('redeem')}
+el.redeemCancel.onclick=()=>{setView('home')}
+el.keyValidate.onclick=()=>{
+  const k=el.keyInput.value.trim();
+  if(!k){showToast('Enter a key');return}
+  if(k!==REQUIRED_KEY){showToast('Invalid key');return}
+  state.key=k;showToast('The key is valid!');el.confirmKey.textContent='Current key: '+k;setView('confirm')
+}
+el.confirmCancel.onclick=()=>{setView('redeem')}
+el.confirmBtn.onclick=()=>{
+  setView('error');
+  el.errorLead.textContent='Processing';
+  el.errorSpinner.style.display='inline-block';
+  el.errorText.textContent='';
+  el.errorHome.classList.add('hidden');
+  setTimeout(()=>{
+    el.errorLead.textContent='Out Of Stock';
+    el.errorSpinner.style.display='none';
+    el.errorText.textContent='The mod is currently out of stock, please wait for a day atleast!';
+    el.errorHome.classList.remove('hidden');
+  },1200);
+}
+el.errorHome.onclick=()=>{setView('home')}
+setView('login');setAccount();
+</script>
+</body>
+</html>
