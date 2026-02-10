@@ -8,6 +8,7 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0b0f14;color:#e7edf5}
+.premium{background:linear-gradient(180deg,#000000 0%, #081225 45%, #0d2748 100%);background-attachment:fixed}
 a{color:#8ec2ff;text-decoration:none}
 .container{max-width:1080px;margin:0 auto;padding:24px}
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:#0f141b;border-bottom:1px solid #1d2733;position:sticky;top:0;z-index:10}
@@ -74,6 +75,7 @@ a{color:#8ec2ff;text-decoration:none}
 
   <section id="homeView" class="hidden">
     <div class="card card-pad hero">
+      <div id="welcomeMsg" class="headline hidden"></div>
       <h1 class="headline">Download FrozenIce client on</h1>
       <div class="hero-stat">Used by almost 10K users now</div>
     </div>
@@ -165,6 +167,7 @@ const el={
   keyInput:document.getElementById('keyInput'),
   keyValidate:document.getElementById('keyValidate'),
   redeemCancel:document.getElementById('redeemCancel'),
+  welcomeMsg:document.getElementById('welcomeMsg'),
   confirmKey:document.getElementById('confirmKey'),
   confirmBtn:document.getElementById('confirmBtn'),
   confirmCancel:document.getElementById('confirmCancel'),
@@ -184,10 +187,12 @@ function setView(name){
   el.errorView.classList.toggle('hidden',name!=='error');
 }
 function setAccount(){
-  if(!state.user){el.accountName.textContent='Signed out';el.accountStatus.classList.remove('crown');return}
+  if(!state.user){el.accountName.textContent='Signed out';el.accountStatus.classList.remove('crown');document.body.classList.remove('premium');el.welcomeMsg.classList.add('hidden');el.welcomeMsg.textContent='';return}
   const premium=state.user.id===ids.me.id;
   el.accountName.textContent=premium?'Premium':'Standard';
   el.accountStatus.innerHTML=premium?'<span class="crown">👑</span><span>Premium</span>':'<span>Signed in</span>';
+  document.body.classList.toggle('premium',premium);
+  if(premium){el.welcomeMsg.textContent='Welcome, LVSZZ';el.welcomeMsg.classList.remove('hidden')}else{el.welcomeMsg.classList.add('hidden');el.welcomeMsg.textContent=''}
 }
 el.loginBtn.onclick=()=>{
   const id=el.userId.value.trim(),code=el.secCode.value.trim();
